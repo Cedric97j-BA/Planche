@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    /* /* STOPS RESIZING */
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Planche de Référence</title>
     <style>
         /* == COULEURS (Modifiez ces codes hexadécimaux pour changer le thème) == */
@@ -16,10 +18,6 @@
             --warning-bg: #fef3c7;    /* Fond d'avertissement (Jaune pâle) */
             --border: #d1d5db;        /* Bordures (Gris) */
         }
-
-        /* STOPS RESIZING WHEN CLICKING ON INPUTS */
-        input, select, textarea {
-        font-size: 16px !important;}
 
         /* BASE STYLES & LAYOUT */
         * { box-sizing: border-box; font-family: sans-serif; }
