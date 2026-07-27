@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planche-store-v1.1.2';
+const CACHE_NAME = 'planche-store-v1.1.3';
 
 // List all files needed offline
 const ASSETS = [
