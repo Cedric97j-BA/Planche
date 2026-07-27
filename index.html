@@ -6,6 +6,10 @@
     <!-- STOPS RESIZING -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Planche de Référence</title>
+
+    <!-- To inset graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         /* == COULEURS (Modifiez ces codes hexadécimaux pour changer le thème) == */
         :root {
@@ -99,6 +103,8 @@
                 <div><label>MV Sèche Finale</label><div class="final-val"><span id="final-mv">---</span> kg/m³</div></div>
                 <div><label>Teneur en eau Finale</label><div class="final-val"><span id="final-w">---</span> %</div></div>
             </div>
+            <!-- LE GRAPHIQUE -->
+            <canvas id="densityChart" style="margin-top: 24px; width: 100%; max-height: 250px;"></canvas>
         </div>
 
         <button id="btn-add" class="btn btn-add" onclick="addPass()">➕ Ajouter une ligne</button>
@@ -166,9 +172,13 @@
             }
         }
 
+        let myChart = null; // Stores the chart so we can update it
+
         function calculateAll() {
             const cards = document.querySelectorAll('.pass-card');
-            let prevMv = null, stableGaps = 0, allFormsFilled = true;
+            let prevMv = null, stableGaps = 0;
+            let allFormsFilled = true, validSequence = true;
+            let prevPassNum = 0; 
             const validPasses = []; 
             
             finalBox.style.display = targetAlert.style.display = btnPdf.style.display = 'none';
@@ -177,16 +187,30 @@
             cards.forEach((card, i) => {
                 let mvAvg = getStrictAverageAndHighlight(Array.from(card.querySelectorAll('.den-val')));
                 let humAvg = getStrictAverageAndHighlight(Array.from(card.querySelectorAll('.hum-val')));
+                const passInput = card.querySelector('.pass-num');
+                const currentPassNum = parseInt(passInput.value);
 
-                if (mvAvg !== null) {
+                // --- PASS NUMBER VALIDATION ---
+                if (currentPassNum) {
+                    if (currentPassNum <= prevPassNum) {
+                        passInput.classList.add('highlight-empty');
+                        validSequence = false;
+                    } else {
+                        passInput.classList.remove('highlight-empty');
+                    }
+                    prevPassNum = currentPassNum;
+                }
+                // ------------------------------
+
+                if (mvAvg !== null && currentPassNum) {
                     mvAvg = Math.round(mvAvg);
-                    validPasses.push({ mv: mvAvg, hum: humAvg });
+                    validPasses.push({ pass: currentPassNum, mv: mvAvg, hum: humAvg });
                 }
                 
                 card.querySelector('.den-avg').textContent = mvAvg !== null ? mvAvg : '---';
                 card.querySelector('.hum-avg').textContent = humAvg !== null ? humAvg.toFixed(1) : '---';
 
-                if (mvAvg === null || humAvg === null || !card.querySelector('.pass-num').value || !card.querySelector('.sd-select').value) {
+                if (mvAvg === null || humAvg === null || !passInput.value || !card.querySelector('.sd-select').value) {
                     allFormsFilled = false;
                 }
 
@@ -206,16 +230,50 @@
 
             if (stableGaps >= 2) {
                 btnAdd.style.display = 'none';
-                if (allFormsFilled && validPasses.length >= 2) {
+                if (allFormsFilled && validSequence && validPasses.length >= 2) {
                     finalBox.style.display = btnPdf.style.display = 'block';
                     const [prev, last] = [validPasses[validPasses.length - 2], validPasses[validPasses.length - 1]];
                     const isLastHigher = last.mv >= prev.mv;
                     document.getElementById('final-mv').textContent = isLastHigher ? last.mv : prev.mv;
                     document.getElementById('final-w').textContent = (isLastHigher ? last.hum : prev.hum).toFixed(1);
+                    
+                    // Draw the chart!
+                    drawChart(validPasses);
+                } else if (!validSequence) {
+                    targetAlert.style.display = 'block';
+                    targetAlert.textContent = "⚠️ Erreur : Le nombre de passes doit toujours augmenter.";
                 } else {
                     targetAlert.style.display = 'block';
+                    targetAlert.textContent = "🎯 Cible atteinte (< 1%). Veuillez remplir tous les champs.";
                 }
             }
+        }
+
+        function drawChart(data) {
+            const ctx = document.getElementById('densityChart').getContext('2d');
+            if(myChart) myChart.destroy(); // Deletes old chart before drawing new one
+            
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.pass),
+                    datasets: [{
+                        label: 'Masse Volumique (kg/m³)',
+                        data: data.map(d => d.mv),
+                        borderColor: '#0284c7',
+                        backgroundColor: '#0284c7',
+                        tension: 0.3, 
+                        borderWidth: 3,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Nombre de passes (n)', font: {weight: 'bold'} } },
+                        y: { title: { display: true, text: 'MV Sèche (kg/m³)', font: {weight: 'bold'} } }
+                    }
+                }
+            });
         }
 
         function getStrictAverageAndHighlight(inputs) {
