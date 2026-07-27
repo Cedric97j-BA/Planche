@@ -1,11 +1,13 @@
-const CACHE_NAME = 'planche-store-v6';
+const CACHE_NAME = 'planche-store-v7';
 
 // List all files needed offline
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-v1.png'
+  './icon-v1.png',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
 ];
 
 // 1. Install and force immediate activation
