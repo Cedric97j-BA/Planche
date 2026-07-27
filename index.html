@@ -85,7 +85,7 @@
 
     <div id="app-container">
         <div class="header">
-            <h1 style="margin:0; color:var(--primary);">Planche de référence <span style="font-size:0.5em; color:gray; vertical-align:middle;">v1.2.0</span></h1>
+            <h1 style="margin:0; color:var(--primary);">Planche de référence <span style="font-size:0.5em; color:gray; vertical-align:middle;">v1.2.2</span></h1>
             <div id="logo-container">
                 <img src="./icon-v1.png" alt="Logo" style="height:40px;"> 
             </div>
@@ -97,7 +97,7 @@
         </div>
 
         <div class="grid-2">
-            <div><label>Localisation</label><input type="text" placeholder="Ex: Éolienne 12"></div>
+            <div><label>Localisation</label><input type="text" placeholder=""></div>
             <div>
                 <label>Dimensions (m)</label>
                 <div style="display: flex; gap: 8px;">
@@ -186,49 +186,89 @@
             }
         }
 
+        let generatedPdfFile = null; // Temporary memory for the iOS Share menu
+
         async function handleSave() {
-            const element = document.getElementById('app-container');
+            const btnPdf = document.getElementById('btn-pdf');
+            const btnReset = document.querySelector('.btn-reset');
+
+            // --- STEP 2: SHARE THE READY FILE ---
+            // If the file is already generated, open the Share menu immediately
+            if (generatedPdfFile) {
+                try {
+                    await navigator.share({
+                        files: [generatedPdfFile],
+                        title: generatedPdfFile.name
+                    });
+                } catch (error) {
+                    console.log("Partage annulé ou erreur:", error);
+                } finally {
+                    // Reset the app interface after sharing (or cancelling)
+                    resetPdfUI();
+                }
+                return; // Stop the function here so it doesn't regenerate the PDF
+            }
+
+            // --- STEP 1: GENERATE THE PDF ---
+            // Change button to show it is loading
+            btnPdf.textContent = "⏳ Génération en cours...";
+            btnPdf.style.backgroundColor = "gray"; // Visual cue that it's working
             
-            // 1. Hide buttons
-            document.querySelectorAll('.btn, .btn-delete').forEach(btn => btn.style.display = 'none');
+            // Hide unwanted elements for the photo
+            btnReset.style.display = 'none';
+            document.querySelectorAll('.btn-delete').forEach(btn => btn.style.display = 'none');
+            window.scrollTo(0, 0); // Fix iOS cutoff
             
-            // 2. Scroll to top to fix the iOS cutoff bug
-            window.scrollTo(0, 0);
-            
-            // 3. Add pagebreak logic and force full-height capture
+            // Generate Timestamp for Filename
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const dynamicFileName = `Planche_${y}${m}${d}_${h}h${min}.pdf`;
+
             const opt = {
                 margin:       5,
-                filename:     'Planche_Reference.pdf',
+                filename:     dynamicFileName,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, scrollY: 0 }, 
-                pagebreak:    { mode: 'avoid-all' }, // Prevents cards from being sliced in half
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             try {
-                // 1. Generate the PDF as a raw file in the background FIRST
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-                const file = new File([pdfBlob], dynamicFileName, { type: "application/pdf" });
-
-                // 2. Check if the device is an iPad/iPhone that supports sharing THIS SPECIFIC PDF
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // Force open the native iOS Share / AirDrop menu
-                    await navigator.share({
-                        files: [file],
-                        title: dynamicFileName,
-                    });
+                // Build the file in the background
+                const pdfBlob = await html2pdf().set(opt).from(document.getElementById('app-container')).output('blob');
+                
+                // Check if this is an iOS device that supports the native share menu
+                const testFile = new File([pdfBlob], dynamicFileName, { type: "application/pdf" });
+                if (navigator.canShare && navigator.canShare({ files: [testFile] })) {
+                    
+                    // Save the file into our temporary memory variable
+                    generatedPdfFile = testFile; 
+                    
+                    // Change the button to trigger Step 2
+                    btnPdf.textContent = "📤 Partager le PDF";
+                    btnPdf.style.backgroundColor = "var(--primary)"; // Make it blue to show it's ready!
                 } else {
-                    // 3. Fallback for laptops and standard browsers
-                    await html2pdf().set(opt).from(element).save();
+                    // Fallback for laptops: Just download it normally and reset
+                    await html2pdf().set(opt).from(document.getElementById('app-container')).save();
+                    resetPdfUI();
                 }
             } catch (error) {
-                console.log("Partage annulé ou erreur:", error);
-            } finally {
-                // 4. Always bring the buttons back, even if they cancel the share
-                document.getElementById('btn-pdf').style.display = 'block';
-                document.querySelector('.btn-reset').style.display = 'block';
-                document.querySelectorAll('.btn-delete').forEach(btn => btn.style.display = 'block');
+                console.log("Erreur de génération:", error);
+                resetPdfUI();
             }
+        }
+
+        // Helper function to put the buttons back to normal
+        function resetPdfUI() {
+            generatedPdfFile = null; // Clear the memory
+            const btnPdf = document.getElementById('btn-pdf');
+            btnPdf.textContent = "📄 Sauvegarder le PDF";
+            btnPdf.style.backgroundColor = "var(--success)"; // Back to green
+            document.querySelector('.btn-reset').style.display = 'block';
+            document.querySelectorAll('.btn-delete').forEach(btn => btn.style.display = 'block');
         }
 
         let myChart = null; // Stores the chart so we can update it
