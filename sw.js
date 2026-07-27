@@ -1,6 +1,6 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('planche-store-v3').then((cache) => cache.addAll([
+    caches.open('planche-store-v4').then((cache) => cache.addAll([
       './',
       './index.html',
       './manifest.json',

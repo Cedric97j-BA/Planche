@@ -62,12 +62,16 @@
         }
     </style>
 
+    /* Helps with displaying the icon on iOS devices */
+    <link rel="apple-touch-icon" href="./icon-v1.png">
+
     <!-- PWA Links -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
         <script>
             if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
-        }   
+        }
+        
 </script>
 </head>
 <body>
@@ -76,7 +80,7 @@
         <div class="header">
             <h1 style="margin:0; color:var(--primary);">Planche de référence</h1>
             <div id="logo-container">
-                <img src="icon-v1.png" alt="Logo" style="height:40px;"> 
+                <img src="./icon-v1.png" alt="Logo" style="height:40px;"> 
             </div>
         </div>
 
