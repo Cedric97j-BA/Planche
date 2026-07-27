@@ -1,6 +1,6 @@
 {
   "name": "Planche de Référence",
-  "short_name": "PlancheRef",
+  "short_name": "Planche_Ref",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f2f5",
