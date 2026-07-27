@@ -1,9 +1,10 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('planche-store').then((cache) => cache.addAll([
+    caches.open('planche-store-v3').then((cache) => cache.addAll([
       './',
       './index.html',
-      './manifest.json'
+      './manifest.json',
+      './icon-v1.png'
     ]))
   );
 });
