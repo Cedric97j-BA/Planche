@@ -85,19 +85,21 @@
 
     <div id="app-container">
         <div class="header">
-            <h1 style="margin:0; color:var(--primary);">Planche de référence <span style="font-size:0.5em; color:gray; vertical-align:middle;">v1.2.3</span></h1>
+            <h1 style="margin:0; color:var(--primary);">Planche de référence <span style="font-size:0.5em; color:gray; vertical-align:middle;">v1.2.4</span></h1>
             <div id="logo-container">
                 <img src="./icon-v1.png" alt="Logo" style="height:40px;"> 
             </div>
         </div>
 
+        <div id="pdf-timestamp" style="display: none; text-align: center; font-size: 0.85rem; color: gray; margin-bottom: 12px; font-weight: bold;"></div>
+
         <div class="grid-2">
             <div><label>Projet</label><input type="text" placeholder="Ex: 0260xxxx - Projet_Planche"></div>
-            <div><label>Matériau / Calibre</label><input type="text" placeholder="Ex: 0-4"></div>
+            <div><label>Matériau / Calibre</label><input type="text" id="input-calibre" placeholder="Ex: 0-4"></div>
         </div>
 
         <div class="grid-2">
-            <div><label>Localisation</label><input type="text" placeholder=""></div>
+            <div><label>Localisation</label><input type="text" id="input-loc" placeholder="Ex: Rivière du Loup"></div>
             <div>
                 <label>Dimensions (m)</label>
                 <div style="display: flex; gap: 8px;">
@@ -191,6 +193,7 @@
         async function handleSave() {
             const btnPdf = document.getElementById('btn-pdf');
             const btnReset = document.querySelector('.btn-reset');
+            const timestampDiv = document.getElementById('pdf-timestamp'); // Make sure this is in your HTML!
 
             // --- STEP 2: SHARE THE READY FILE ---
             if (generatedPdfFile) {
@@ -211,22 +214,46 @@
             btnPdf.textContent = "⏳ Génération en cours...";
             btnPdf.style.backgroundColor = "gray"; 
             
-            // 1. Memorize exactly where the user is looking
             const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
             
             btnReset.style.display = 'none';
             document.querySelectorAll('.btn-delete').forEach(btn => btn.style.display = 'none');
             
-            // Temporarily jump to top to fix the iOS cutoff bug
-            window.scrollTo(0, 0); 
-            
+            // Generate Date and Time variables
             const now = new Date();
             const y = now.getFullYear();
             const m = String(now.getMonth() + 1).padStart(2, '0');
             const d = String(now.getDate()).padStart(2, '0');
             const h = String(now.getHours()).padStart(2, '0');
             const min = String(now.getMinutes()).padStart(2, '0');
-            const dynamicFileName = `Planche_${y}${m}${d}_${h}h${min}.pdf`;
+            
+            // 1. Flash the timestamp on screen just for the PDF snapshot
+            if (timestampDiv) {
+                timestampDiv.textContent = `Généré le ${d}/${m}/${y} à ${h}h${min}`;
+                timestampDiv.style.display = 'block';
+            }
+
+            window.scrollTo(0, 0); 
+            
+            // 2. Acronym logic for Localisation
+            let locRaw = document.getElementById('input-loc').value.trim();
+            let siteCode = 'Loc'; // Fallback if empty
+            if (locRaw) {
+                let words = locRaw.split(/\s+/);
+                if (words.length > 1) {
+                    // Multiple words: Take first letter of each (Rivière du Loup -> RDL)
+                    siteCode = words.map(w => w.charAt(0).toUpperCase()).join('');
+                } else {
+                    // Single word: Keep it as is (Rimouski -> Rimouski)
+                    siteCode = words[0];
+                }
+            }
+
+            // 3. Clean up the Calibre input
+            let calText = document.getElementById('input-calibre').value.trim().replace(/\s+/g, '_') || 'Calibre';
+            
+            // 4. Final Filename generation (NO TIME INCLUDED)
+            const dynamicFileName = `Planche_${siteCode}_${calText}_${y}${m}${d}.pdf`;
 
             const opt = {
                 margin:       5,
@@ -240,8 +267,9 @@
                 // Build the file in the background
                 const pdfBlob = await html2pdf().set(opt).from(document.getElementById('app-container')).output('blob');
                 
-                // 2. Instantly jump back down to the button!
+                // Jump back down and hide the timestamp immediately
                 window.scrollTo(0, currentScrollPosition);
+                if (timestampDiv) timestampDiv.style.display = 'none'; 
 
                 const testFile = new File([pdfBlob], dynamicFileName, { type: "application/pdf" });
                 if (navigator.canShare && navigator.canShare({ files: [testFile] })) {
@@ -249,7 +277,7 @@
                     btnPdf.textContent = "📤 Partager le PDF";
                     btnPdf.style.backgroundColor = "var(--primary)"; 
                 } else {
-                    // Optimized fallback for laptops: directly download the generated file
+                    // Optimized fallback for laptops
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(pdfBlob);
                     link.download = dynamicFileName;
@@ -258,9 +286,21 @@
                 }
             } catch (error) {
                 console.log("Erreur de génération:", error);
-                window.scrollTo(0, currentScrollPosition); // Backup restore just in case
+                window.scrollTo(0, currentScrollPosition); 
+                if (timestampDiv) timestampDiv.style.display = 'none'; 
                 resetPdfUI();
             }
+        }
+
+        function resetPdfUI() {
+            generatedPdfFile = null; 
+            const btnPdf = document.getElementById('btn-pdf');
+            btnPdf.textContent = "📄 Sauvegarder le PDF";
+            btnPdf.style.backgroundColor = "var(--success)"; 
+            document.querySelector('.btn-reset').style.display = 'block';
+            document.querySelectorAll('.btn-delete').forEach(btn => btn.style.display = 'block');
+            const timestampDiv = document.getElementById('pdf-timestamp');
+            if (timestampDiv) timestampDiv.style.display = 'none';
         }
 
         function resetPdfUI() {
