@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.1.0';
+const APP_VERSION = 'v1.0.1.1';
 
 // ========================================== //
 // 1. NAVIGATION ET INITIALISATION            //
