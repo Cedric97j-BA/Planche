@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planche-ref-v1.0.1.4';
+const CACHE_NAME = 'planche-ref-v1.0.1.5';
 const ASSETS = [
     './',
     './index.html',

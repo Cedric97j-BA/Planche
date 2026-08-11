@@ -33,7 +33,7 @@
         <div style="display: flex; flex-direction: column; gap: 5px;">
             <h1 style="margin: 0; font-size: 1.5rem; letter-spacing: 0.5px;">Planche de Référence</h1>
             <div>
-                <span id="app-version" style="font-size: 0.95rem; font-weight: bold; background: #0369a1; padding: 3px 10px; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">v1.0.1.4</span>
+                <span id="app-version" style="font-size: 0.95rem; font-weight: bold; background: #0369a1; padding: 3px 10px; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">v1.0.1.5</span>
             </div>
         </div>
     </header>
@@ -84,13 +84,16 @@
     <!-- BARRE DE NAVIGATION (TABS)                 -->
     <!-- ========================================== -->
 
-    <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 3px;">
-        Clicker sur les onglets pour naviguer entre les sections du formulaire. Les informations sont sauvegardées automatiquement dans le stockage local de votre navigateur.
+    <small id="form-instructions" style=" display: block;  margin-bottom: 35px;  margin-left: auto; margin-right: auto; max-width: 600px;">
+    </small>
+
+    <small style="color: #242930; font-size: 0.8rem; display: block; margin-top: 3px; margin-bottom: 5px; text-align: center; margin-left: auto; margin-right: auto; max-width: 600px;">
+        Cliquez sur les onglets pour naviguer entre les sections du formulaire. Les informations sont sauvegardées automatiquement. Vous pouvez passer d'une section à l'autre. Cependant prenez soin de bien sauvegarder votre rapport avant de quitter la page ou de fermer l'application.
     </small>
 
     <nav id="form-navigation" style="margin-bottom: 20px;">
-        <button type="button" class="tab-btn active" onclick="showTab('tab-form1')">1. Spécifications & Équipement</button>
-        <button type="button" class="tab-btn" onclick="showTab('tab-form2')">2. Planche de Référence (Passes)</button>
+        <button type="button" class="tab-btn active" onclick="showTab('tab-form1')">1. Spécifications & Équipements</button>
+        <button type="button" class="tab-btn" onclick="showTab('tab-form2')">2. Planche de Référence</button>
         <button type="button" class="tab-btn" onclick="showTab('tab-form3')">3. Échantillons & Signatures</button>
     </nav>
 
@@ -233,14 +236,22 @@
                 <div class="input-group"><label>Correction de la teneur en eau</label><input type="text" id="nuc-correction"></div>
             </div>
         </div>
+
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#form-instructions" style="color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1rem; padding: 10px 20px; background: #e2e8f0; border-radius: 6px; display: inline-block;">
+                ⬆️ Retour aux sections du formulaire
+            </a>
+        </div>
+        
     </section>
 
     <!-- ========================================== -->
     <!-- ONGLET 2 : PLANCHE DE RÉFÉRENCE (PASSES)   -->
     <!-- ========================================== -->
     <section id="tab-form2" class="tab-section" style="display: none;">
-        <h2>Planche de Référence - Séquence des Passes</h2>
-        <p style="color: gray; font-size: 0.9rem; margin-bottom: 15px;">
+        <h2>Planche de Référence</h2>
+        <p style="color: #242930; font-size: 0.9rem; margin-bottom: 15px;">
             Entrez le nombre de passes, les 3 points de masse volumique sèche (MV) et la teneur en eau (w) pour chaque étape. Le système calcule automatiquement les moyennes, l'écart (ΔMV) et valide la stabilisation (&lt; 1%).
         </p>
 
@@ -263,37 +274,44 @@
         </div>
 
         <button type="button" id="btn-add" class="tab-btn" onclick="addPass()" style="margin-top: 15px; background: var(--primary); color: white; width: 100%;">➕ Ajouter une ligne de passe</button>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#form-instructions" style="color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1rem; padding: 10px 20px; background: #e2e8f0; border-radius: 6px; display: inline-block;">
+                ⬆️ Retour aux sections du formulaire
+            </a>
+        </div>
+
     </section>
 
     <!-- TEMPLATE POUR UNE LIGNE DE PASSE (11 COLONNES LOGIQUES) -->
     <template id="pass-template">
         <div class="pass-card" style="border: 1px solid var(--border); border-radius: 6px; margin-bottom: 16px; overflow: hidden; background: #f8fafc;">
             <div class="pass-header" style="background: #e2e8f0; padding: 10px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-                <div>1. Nombre de passes ($n$) : <input type="number" class="pass-num trigger" style="width:70px; margin-left:8px; display:inline-block;" min="1"></div>
+                <div>Nombre de passes (n) : <input type="number" class="pass-num trigger" style="width:70px; margin-left:8px; display:inline-block;" min="1"></div>
                 <button type="button" class="btn-delete" onclick="this.closest('.pass-card').remove(); calculateAll();" title="Supprimer" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--danger);">❌</button>
             </div>
             <div class="pass-body" style="padding: 15px;">
-                <label style="color: var(--primary); margin-bottom: 6px;">2-4. Masse volumique sèche (MV) [kg/m³]</label>
+                <label style="color: var(--primary); margin-bottom: 6px;">Masse volumique sèche (MV) [kg/m³]</label>
                 <div class="points-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px;">
                     <input type="number" class="trigger den-val" placeholder="Pt A">
                     <input type="number" class="trigger den-val" placeholder="Pt B">
                     <input type="number" class="trigger den-val" placeholder="Pt C">
                 </div>
-                <div class="avg-bar" style="text-align: right; font-weight: bold; color: var(--primary); margin-bottom: 12px;">5. Moyenne MV : <span class="den-avg">---</span> kg/m³</div>
+                <div class="avg-bar" style="text-align: right; font-weight: bold; color: var(--primary); margin-bottom: 12px;">Moyenne MV : <span class="den-avg">---</span> kg/m³</div>
 
-                <label style="color: var(--primary); margin-bottom: 6px;">6-8. Teneur en eau mesurée ($w$) [%]</label>
+                <label style="color: var(--primary); margin-bottom: 6px;">Teneur en eau mesurée (w) [%]</label>
                 <div class="points-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px;">
                     <input type="number" class="trigger hum-val" placeholder="Pt A">
                     <input type="number" class="trigger hum-val" placeholder="Pt B">
                     <input type="number" class="trigger hum-val" placeholder="Pt C">
                 </div>
-                <div class="avg-bar" style="text-align: right; font-weight: bold; color: var(--primary); margin-bottom: 12px;">9. Moyenne Eau : <span class="hum-avg">---</span> %</div>
+                <div class="avg-bar" style="text-align: right; font-weight: bold; color: var(--primary); margin-bottom: 12px;">Moyenne w : <span class="hum-avg">---</span> %</div>
 
                 <div class="results-bar" style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 10px; border-radius: 4px; border: 1px solid var(--border); font-weight: bold;">
-                    <span>10. Écart ($\Delta$MV) : <span class="delta-mv" style="color:var(--primary); font-size:1.1rem;">---</span></span>
+                    <span>Écart (ΔMV) : <span class="delta-mv" style="color:var(--primary); font-size:1.1rem;">---</span></span>
                     <div>
-                        <span style="font-size:0.85rem; margin-right:5px;">11. Mode :</span>
-                        <select class="trigger sd-select" style="font-weight: bold; background: white; padding: 6px; width: auto; display: inline-block;">
+                        <span style="font-size:0.85rem; margin-right:5px;">Mode :</span>
+                        <select class="trigger sd-select" style="font-weight: bold; text-align: center; background: white; padding: 6px; width: auto; display: inline-block;">
                             <option value="">S ou D</option>
                             <option value="S">S (Statique)</option>
                             <option value="D">D (Dynamique)</option>
@@ -316,7 +334,7 @@
         </div>
 
         <div class="form-section">
-            <h3>Numéros d'Échantillons Prélévés (Max 6)</h3>
+            <h3>Numéros d'Échantillons Prélévés</h3>
             <div class="grid-2">
                 <div class="input-group"><label>Échantillon #1</label><input type="text" id="sample-num-1"></div>
                 <div class="input-group"><label>Échantillon #2</label><input type="text" id="sample-num-2"></div>
@@ -332,16 +350,27 @@
         </div>
 
         <div class="form-section" style="border-top: 2px solid #ccc; padding-top: 15px;">
-            <h3>Signatures et Vérification</h3>
+            <h3>Signatures</h3>
             <div class="grid-2">
-                <div class="input-group"><label>Préparé par (Nom du technicien)</label><input type="text" id="sig-prep-nom" placeholder="Max Coulombe"></div>
+                <div class="input-group"><label>Préparé par</label><input type="text" id="sig-prep-nom" placeholder="Max Coulombe"></div>
                 <div class="input-group"><label>Date de préparation</label><input type="date" id="sig-prep-date"></div>
             </div>
             <div class="grid-2" style="margin-top: 10px;">
-                <div class="input-group"><label>Vérifié par (Ingénieur / Superviseur)</label><input type="text" id="sig-verif-nom"></div>
+                <div class="input-group"><label>Vérifié par</label><input type="text" id="sig-verif-nom"></div>
                 <div class="input-group"><label>Date de vérification</label><input type="date" id="sig-verif-date"></div>
             </div>
         </div>
+
+        <small id="form-instructions" style="color: #242930; font-size: 0.8rem; display: block; margin-top: 3px; margin-bottom: 5px; text-align: center; margin-left: auto; margin-right: auto; max-width: 600px;">
+            Veuillez exporter le formulaire en PDF pour le soumettre et/ou le sauvegarder avant de fermer la page/l'application. Les données sont sauvegardées localement, mais l'exportation en PDF est nécessaire pour la soumission officielle.
+        </small>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#form-instructions" style="color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1rem; padding: 10px 20px; background: #e2e8f0; border-radius: 6px; display: inline-block;">
+                ⬆️ Retour aux sections du formulaire
+            </a>
+        </div>
+
     </section>
 
 </div>
@@ -349,8 +378,8 @@
 <!-- ========================================== -->
 <!-- LE CERVEAU (JAVASCRIPT)                    -->
 <!-- ========================================== -->
-<script src="pdf_templates.js?v=1.0.1.4"></script>
-<script src="app.js?v=1.0.1.4"></script>
+<script src="pdf_templates.js?v=1.0.1.5"></script>
+<script src="app.js?v=1.0.1.5"></script>
 
 <script>
     if ('serviceWorker' in navigator) {

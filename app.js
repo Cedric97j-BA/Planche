@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.1.4';
+const APP_VERSION = 'v1.0.1.5';
 
 // ========================================== //
 // 1. NAVIGATION ET INITIALISATION            //
@@ -588,22 +588,31 @@ async function exportToPDF() {
             }
 
             if (val !== null && val !== undefined && val !== '---' && val !== '') {
-                try {
-                    let finalStr = val.toString().replace(/(\d)\.(\d)/g, '$1,$2');
-
-                    if (typeof field.setText === 'function') {
-                        field.setText(finalStr);
-                    } else if (typeof field.select === 'function') {
-                        try { field.addOptions([finalStr]); } catch(e) {}
-                        field.select(finalStr);
-                    } else if (typeof field.check === 'function') {
-                        if (val === true) field.check();
-                        else field.uncheck();
-                    }
-                } catch (e) {
-                    console.warn(`Warning: Could not set PDF field ${pdfName}`, e);
+            try {
+                let finalStr = val.toString();
+                
+                // EXCLUSION TOTALE : Si le champ concerne un numéro de projet, on garde le point (ex: 2026.04)
+                const lowerName = pdfName.toLowerCase();
+                const isProjectNumber = lowerName.includes('projet') || lowerName.includes('no-') || lowerName.includes('numero');
+                
+                if (!isProjectNumber) {
+                    finalStr = finalStr.replace(/(\d)\.(\d)/g, '$1,$2');
                 }
+
+                if (typeof field.setText === 'function') {
+                    field.setText(finalStr);
+                } else if (typeof field.select === 'function') {
+                    try { field.addOptions([finalStr]); } catch(e) {}
+                    field.select(finalStr);
+                } else if (typeof field.check === 'function') {
+                    if (val === true) field.check();
+                    else field.uncheck();
+                }
+            } catch (e) {
+                console.warn(`Warning: Could not set PDF field ${pdfName}`, e);
             }
+        }
+
         });
 
         try {
