@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.1.5';
+const APP_VERSION = 'v1.0.1.6';
 
 // ========================================== //
 // 1. NAVIGATION ET INITIALISATION            //
@@ -398,6 +398,13 @@ function loadReport() {
     currentActiveReportKey = selectedKey; 
     dropdown.value = selectedKey;
     alert("Rapport chargé avec succès.");
+}
+
+function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function saveReport() {
