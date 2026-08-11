@@ -407,7 +407,17 @@ function saveReport() {
     const techName = document.getElementById('sig-prep-nom')?.value || '';
     const techInitials = techName.split(' ').filter(n => n).map(n => n[0].toUpperCase()).join('') || 'TECH';
     
-    const baseName = `planche_${noProjet}_${rawDate}_${calibre}_${techInitials}`;
+    // Génération du nom automatique de base
+    const defaultBaseName = `planche_${noProjet}_${rawDate}_${calibre}_${techInitials}`;
+
+    // Demande à l'utilisateur de valider ou personnaliser le nom
+    let userPromptName = prompt("Nom de sauvegarde du rapport (modifiable) :", defaultBaseName);
+    if (userPromptName === null) return; // Annulation par l'utilisateur
+    
+    let baseName = userPromptName.trim() || defaultBaseName;
+    if (!baseName.startsWith('planche_')) {
+        baseName = `planche_${baseName}`;
+    }
 
     const staticData = {};
     document.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
@@ -432,7 +442,7 @@ function saveReport() {
     });
 
     let saveKey = currentActiveReportKey;
-    if (!saveKey) {
+    if (!saveKey || saveKey !== baseName) {
         let maxIndex = 0;
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -458,7 +468,7 @@ function saveReport() {
     updateDropdown();
     const dropdown = document.getElementById('saved-reports-dropdown');
     if (dropdown) dropdown.value = saveKey;
-    alert("Rapport sauvegardé avec succès.");
+    alert("Rapport sauvegardé avec succès sous : " + saveKey);
 }
 
 let deleteArmed = false;
