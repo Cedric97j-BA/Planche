@@ -415,7 +415,7 @@ function saveReport() {
     const techInitials = techName.split(' ').filter(n => n).map(n => n[0].toUpperCase()).join('') || 'TECH';
     
     // Génération du nom automatique de base
-    const defaultBaseName = `planche_${noProjet}_${rawDate}_${calibre}_${techInitials}`;
+    const defaultBaseName = `planche_${rawDate}_${noProjet}_${calibre}_${techInitials}`;
 
     // Demande à l'utilisateur de valider ou personnaliser le nom
     let userPromptName = prompt("Nom de sauvegarde du rapport (modifiable) :", defaultBaseName);
